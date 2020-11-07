@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
 const FeedbackForm = () => {
   const classes = useStyles();
   const anchor = useRef();
+  const telInput = useRef();
   const [open, setOpen] = useState(false);
   const { handleSubmit, register, errors } = useForm({
     mode: 'onChange',
@@ -70,7 +71,7 @@ const FeedbackForm = () => {
   }, []);
 
   const onSubmit = (data) => {
-    console.log(data);
+    console.log({...data, phone: data.phone.replace(/[-()\s]+/g, '')});
     setOpen(false);
   };
 
@@ -82,6 +83,27 @@ const FeedbackForm = () => {
     const day = tomorrow.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}T${time}:00`;
   };
+  
+  const handleInput = ({ target: { value } }) => {
+    const currentValue = value.replace(/[^\d+]/g, '');
+    console.log(currentValue, currentValue.length)
+  const cvLength = currentValue.length;
+  if (cvLength < 3) {
+    telInput.current.value = '+7';
+    return
+  };
+  if (cvLength < 6) {
+    telInput.current.value = currentValue;
+    return
+  };
+    if (cvLength < 9) {telInput.current.value = 
+      `${currentValue.slice(0, 2)} (${currentValue.slice(2, 5)}) ${currentValue.slice(5)}`;
+  return
+  }
+   telInput.current.value = 
+   `${currentValue.slice(0, 2)} (${currentValue.slice(2, 5)}) ${currentValue.slice(5, 8)}-${currentValue.slice(8,)}`;
+  
+  }
 
   return (
     <>
@@ -112,14 +134,17 @@ const FeedbackForm = () => {
             inputRef={register({
               required: 'Это обязательное поле',
               minLength: {
-                value: 10,
-                message: 'Не менее 10 символов',
+                value: 17,
+                message: 'Неверный формат номера',
               },
               maxLength: {
-                value: 10,
-                message: 'Не более 10 символов',
+                value: 17,
+                message: 'Неверный формат номера',
               },
             })}
+            
+            InputProps={{ inputProps: { ref: telInput } }}
+            placeholder='+7 (xxx) xxx-xxxx'
             name='phone'
             margin='normal'
             className={classes.mb12}
@@ -127,6 +152,7 @@ const FeedbackForm = () => {
             defaultValue={'+7'}
             required
             autoComplete='off'
+            onChange={handleInput}
             error={!!errors.phone}
             helperText={errors.phone ? errors.phone.message : null}
           />
