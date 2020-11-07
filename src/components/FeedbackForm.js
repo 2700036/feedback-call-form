@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
   datetime: {},
   submitButton: {},
   checkBoxLabel: {
-    fontSize: theme.spacing(1.5),
+    fontSize: theme.spacing(1.4),
   },
   checkBoxError: { color: '#f44336' },
   checkBoxErrorText: {
@@ -56,7 +56,7 @@ const FeedbackForm = () => {
   const telInput = useRef();
   const [open, setOpen] = useState(false);
   const { handleSubmit, register, errors } = useForm({
-    mode: 'onChange',
+    // mode: 'onChange',
   });
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const FeedbackForm = () => {
   return
   }
    telInput.current.value = 
-   `${currentValue.slice(0, 2)} (${currentValue.slice(2, 5)}) ${currentValue.slice(5, 8)}-${currentValue.slice(8,)}`;
+   `${currentValue.slice(0, 2)} (${currentValue.slice(2, 5)}) ${currentValue.slice(5, 8)}-${currentValue.slice(8,12)}`;
   
   }
 
@@ -136,19 +136,15 @@ const FeedbackForm = () => {
               minLength: {
                 value: 17,
                 message: 'Неверный формат номера',
-              },
-              maxLength: {
-                value: 17,
-                message: 'Неверный формат номера',
-              },
+              },              
             })}
             
             InputProps={{ inputProps: { ref: telInput } }}
             placeholder='+7 (xxx) xxx-xxxx'
             name='phone'
             margin='normal'
-            className={classes.mb12}
-            label='на номер:'
+            
+            label='Ваш номер телефона'
             defaultValue={'+7'}
             required
             autoComplete='off'
@@ -168,7 +164,7 @@ const FeedbackForm = () => {
             name='date'
             margin='normal'
             id='datetime-local'
-            label='в какое время:'
+            label='Когда позвонить?'
             type='datetime-local'
             min={getMinDate()}
             defaultValue={getMinDate('10')}
@@ -203,7 +199,7 @@ const FeedbackForm = () => {
               control={
                 <Checkbox
                   inputRef={register({
-                    required: 'Это обязательное поле',
+                    required: 'Необходимо ваше согласие',
                   })}
                   name='checkBox'
                   color='primary'
@@ -216,7 +212,7 @@ const FeedbackForm = () => {
                   }
                 />
               }
-              label='Согласен с предоставлением услуги'
+              label='Согласие на обработку персональных данных'
             />
             {!!errors.checkBox && (
               <FormHelperText className={classes.checkBoxErrorText}>
@@ -229,7 +225,7 @@ const FeedbackForm = () => {
             variant='contained'
             color='primary'
             startIcon={<PermPhoneMsgIcon />}
-            size='small'
+            size='medium'
             type='submit'
             disableElevation
           >
