@@ -14,6 +14,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import green from '@material-ui/core/colors/green';
 import GazillaApiContext from './GazillaApiContext';
+import { getMinDate } from '../utils';
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -36,9 +37,7 @@ const useStyles = makeStyles((theme) => ({
   form: {
     display: 'flex',
     flexDirection: 'column',
-  },
-  datetime: {},
-  submitButton: {},
+  },  
   checkBoxLabel: {
     fontSize: theme.spacing(1.4),
   },
@@ -81,35 +80,27 @@ const FeedbackForm = () => {
       setOpen(false);      
     }) 
     .catch(err => setAlertOpen(err))     
-  };
-
-  const getMinDate = (hour = '00') => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const year = tomorrow.getFullYear();
-    const month = (tomorrow.getMonth() + 1).toString().padStart(2, '0');
-    const day = tomorrow.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}T${hour}:00`;
-  };
+  }; 
   
   const handleInput = ({ target: { value } }) => {
     const currentValue = value.replace(/[^\d+]/g, '');    
-  const cvLength = currentValue.length;
-  if (cvLength < 3) {
-    telInput.current.value = '+7';
-    return
-  };
-  if (cvLength < 6) {
-    telInput.current.value = currentValue;
-    return
-  };
-    if (cvLength < 9) {telInput.current.value = 
+    const cvLength = currentValue.length;
+    if (cvLength < 3) {
+      telInput.current.value = '+7';
+      return
+    };
+    if (cvLength < 6) {
+      telInput.current.value = currentValue;
+      return
+    };
+    if (cvLength < 9) {
+      telInput.current.value = 
       `${currentValue.slice(0, 2)} (${currentValue.slice(2, 5)}) ${currentValue.slice(5)}`;
-  return
-  }
-   telInput.current.value = 
-   `${currentValue.slice(0, 2)} (${currentValue.slice(2, 5)}) ${currentValue.slice(5, 8)}-${currentValue.slice(8,12)}`;
-  }
+      return
+    }
+    telInput.current.value = 
+    `${currentValue.slice(0, 2)} (${currentValue.slice(2, 5)}) ${currentValue.slice(5, 8)}-${currentValue.slice(8,12)}`;
+    }
 
   return (
     <>
@@ -153,6 +144,7 @@ const FeedbackForm = () => {
             defaultValue={'+7'}            
             autoComplete='off'
             onChange={handleInput}
+            required
             error={!!errors.phone}
             helperText={errors.phone ? errors.phone.message : null}
           />
@@ -176,6 +168,7 @@ const FeedbackForm = () => {
             InputLabelProps={{
               shrink: true,
             }}
+            required
             error={!!errors.date}
             helperText={errors.date ? errors.date.message : null}
           />
