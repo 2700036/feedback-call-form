@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { useForm } from 'react-hook-form';
 import Popover from '@material-ui/core/Popover';
@@ -10,12 +10,16 @@ import PermPhoneMsgIcon from '@material-ui/icons/PermPhoneMsg';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Typography } from '@material-ui/core';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 import green from '@material-ui/core/colors/green';
+import GazillaApiContext from './GazillaApiContext';
 
-const useStyles = makeStyles((theme) => ({
-  // input: {
-  //   marginBottom: theme.spacing(6)
-  // },
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+const useStyles = makeStyles((theme) => ({ 
   anchor: {
     position: 'absolute',
     bottom: theme.spacing(10),
@@ -26,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
   },
   icon: {
-    color: green[700],
+    color: green[500],
     fontSize: theme.spacing(5),
   },
   form: {
@@ -55,9 +59,9 @@ const FeedbackForm = () => {
   const anchor = useRef();
   const telInput = useRef();
   const [open, setOpen] = useState(false);
-  const { handleSubmit, register, errors } = useForm({
-    // mode: 'onChange',
-  });
+  const [alertOpen, setAlertOpen] = useState(false);
+  const gazillaApi = useContext(GazillaApiContext);
+  const { handleSubmit, register, errors } = useForm();
 
   useEffect(() => {
     const autoOpen = () =>
@@ -71,22 +75,25 @@ const FeedbackForm = () => {
   }, []);
 
   const onSubmit = (data) => {
-    console.log({...data, phone: data.phone.replace(/[-()\s]+/g, '')});
-    setOpen(false);
+    gazillaApi.test(data)
+    .then(res => {       
+      setAlertOpen(res)
+      setOpen(false);      
+    }) 
+    .catch(err => setAlertOpen(err))     
   };
 
-  const getMinDate = (time = '00') => {
+  const getMinDate = (hour = '00') => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const year = tomorrow.getFullYear();
     const month = (tomorrow.getMonth() + 1).toString().padStart(2, '0');
     const day = tomorrow.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}T${time}:00`;
+    return `${year}-${month}-${day}T${hour}:00`;
   };
   
   const handleInput = ({ target: { value } }) => {
-    const currentValue = value.replace(/[^\d+]/g, '');
-    console.log(currentValue, currentValue.length)
+    const currentValue = value.replace(/[^\d+]/g, '');    
   const cvLength = currentValue.length;
   if (cvLength < 3) {
     telInput.current.value = '+7';
@@ -102,7 +109,6 @@ const FeedbackForm = () => {
   }
    telInput.current.value = 
    `${currentValue.slice(0, 2)} (${currentValue.slice(2, 5)}) ${currentValue.slice(5, 8)}-${currentValue.slice(8,12)}`;
-  
   }
 
   return (
@@ -142,11 +148,9 @@ const FeedbackForm = () => {
             InputProps={{ inputProps: { ref: telInput } }}
             placeholder='+7 (xxx) xxx-xxxx'
             name='phone'
-            margin='normal'
-            
+            margin='normal'            
             label='Ваш номер телефона'
-            defaultValue={'+7'}
-            required
+            defaultValue={'+7'}            
             autoComplete='off'
             onChange={handleInput}
             error={!!errors.phone}
@@ -167,7 +171,7 @@ const FeedbackForm = () => {
             label='Когда позвонить?'
             type='datetime-local'
             min={getMinDate()}
-            defaultValue={getMinDate('10')}
+            defaultValue={getMinDate('09')}
             className={`${classes.datetime} ${classes.mb12}`}
             InputLabelProps={{
               shrink: true,
@@ -184,11 +188,11 @@ const FeedbackForm = () => {
             })}
             multiline
             rowsMax={7}
-            name='message'
+            name='comment'
             label='Комментарий'
             autoComplete='off'
-            error={!!errors.message}
-            helperText={errors.message ? errors.message.message : null}
+            error={!!errors.comment}
+            helperText={errors.comment ? errors.comment.message : null}
           />
           <div style={{ position: 'relative' }}>
             <FormControlLabel
@@ -212,7 +216,7 @@ const FeedbackForm = () => {
                   }
                 />
               }
-              label='Согласие на обработку персональных данных'
+              label='Согласен с предоставлением услуги'
             />
             {!!errors.checkBox && (
               <FormHelperText className={classes.checkBoxErrorText}>
@@ -233,6 +237,11 @@ const FeedbackForm = () => {
           </Button>
         </form>
       </Popover>
+      <Snackbar open={!!alertOpen} autoHideDuration={3000} onClose={()=>setAlertOpen(null)}>
+        <Alert onClose={()=>setAlertOpen(null)} severity={alertOpen?.data ? 'success' : 'error'}>
+          {alertOpen?.data ? 'Мы Вам перезвоним!' : 'Упс! Попробуйте ещё раз.'}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
