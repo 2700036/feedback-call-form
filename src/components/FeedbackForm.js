@@ -74,12 +74,14 @@ const FeedbackForm = () => {
   }, []);
 
   const onSubmit = (data) => {
-    gazillaApi.test(data)
-    .then(res => {       
+    gazillaApi.postRequest(data)
+    .then(res => {           
       setAlertOpen(res)
       setOpen(false);      
     }) 
-    .catch(err => setAlertOpen(err))     
+    .catch(err => {      
+      setAlertOpen(err)
+    })     
   }; 
   
   const handleInput = ({ target: { value } }) => {
